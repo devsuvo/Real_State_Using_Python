@@ -1,0 +1,106 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<div class="dash-head">
+  <div>
+    {% if not resource.singleton %}
+    <a href="{% url 'dashboard:list' resource.key %}" class="back-link"><i class="bi bi-arrow-left"></i>{{ resource.label }}</a>
+    {% endif %}
+    <h1>{{ page_title }}</h1>
+    {% if resource.description and resource.singleton %}<p>{{ resource.description }}</p>{% endif %}
+  </div>
+  <div class="dash-head-actions">
+    {% if view_url %}<a href="{{ view_url }}" target="_blank" rel="noopener" class="btn btn-dash-light"><i class="bi bi-box-arrow-up-right"></i>View on website</a>{% endif %}
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="dash-form" novalidate>
+  {% csrf_token %}
+  <div class="row g-4">
+    <div class="col-xl-9 col-lg-8">
+      {% if form.non_field_errors %}
+        <div class="dash-alert dash-alert-error mb-4"><i class="bi bi-exclamation-octagon"></i><span>{{ form.non_field_errors|join:" " }}</span></div>
+      {% endif %}
+
+      {% for section in sections %}
+      <section class="card-d form-section" id="section-{{ forloop.counter }}">
+        <header class="form-section-head">
+          <h2>{{ section.title }}</h2>
+          {% if section.help %}<p>{{ section.help }}</p>{% endif %}
+        </header>
+        <div class="row g-3">
+          {% for item in section.fields %}
+            {% include "dashboard/partials/field.html" %}
+          {% endfor %}
+        </div>
+      </section>
+      {% endfor %}
+
+      {% if gallery %}
+      <section class="card-d form-section" id="section-gallery">
+        <header class="form-section-head">
+          <h2>Photo gallery</h2>
+          <p>Extra photos shown on the property page. Upload a file or paste an image link, then set the order (lowest first). Two empty slots are added each time you save.</p>
+        </header>
+        {{ gallery.management_form }}
+        {% if gallery.non_form_errors %}<div class="dash-alert dash-alert-error mb-3"><span>{{ gallery.non_form_errors|join:" " }}</span></div>{% endif %}
+        <div class="gallery-grid">
+          {% for gf in gallery.forms %}
+          <div class="gallery-item {% if not gf.instance.pk %}is-new{% endif %}" data-image-field>
+            {{ gf.id }}
+            <div class="gallery-thumb">
+              {% if gf.instance.img %}
+                <img src="{{ gf.instance.img }}{% if 'unsplash' in gf.instance.img %}&w=400&h=280&fit=crop&q=60{% endif %}" alt="" data-preview-img>
+              {% else %}
+                <img src="" alt="" data-preview-img hidden><span class="image-empty" data-preview-empty><i class="bi bi-image"></i>New photo</span>
+              {% endif %}
+            </div>
+            <div class="gallery-fields">
+              <label class="form-label small" for="{{ gf.image.id_for_label }}">Upload</label>
+              <input type="file" name="{{ gf.image.html_name }}" id="{{ gf.image.id_for_label }}" class="form-control form-control-sm" accept="image/*" data-file-input>
+              <label class="form-label small mt-2" for="{{ gf.image_url.id_for_label }}">…or image link</label>
+              <input type="url" name="{{ gf.image_url.html_name }}" id="{{ gf.image_url.id_for_label }}" value="{{ gf.image_url.value|default:'' }}" class="form-control form-control-sm" placeholder="https://…" data-url-input>
+              <div class="d-flex align-items-center justify-content-between gap-2 mt-2">
+                <div class="d-flex align-items-center gap-2"><label class="form-label small mb-0" for="{{ gf.order.id_for_label }}">Order</label>{{ gf.order }}</div>
+                {% if gf.instance.pk %}<label class="gallery-del">{{ gf.DELETE }} Remove</label>{% endif %}
+              </div>
+              {% for e in gf.errors.values %}<div class="field-error">{{ e.0 }}</div>{% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    </div>
+
+    <aside class="col-xl-3 col-lg-4">
+      <div class="form-side">
+        <section class="card-d">
+          <h2 class="side-title">{% if is_new %}Create{% else %}Save changes{% endif %}</h2>
+          {% if not is_new and obj.updated %}<p class="side-meta"><i class="bi bi-clock-history"></i>Last updated {{ obj.updated|date:"M j, Y · g:i A" }}</p>{% endif %}
+          {% if can_change or is_new %}
+          <button type="submit" class="btn btn-dash w-100" name="_save"><i class="bi bi-check2"></i>{% if is_new %}Create {{ resource.singular|lower }}{% else %}Save{% endif %}</button>
+          {% if not resource.singleton %}
+          <button type="submit" class="btn btn-dash-light w-100 mt-2" name="_continue">Save &amp; keep editing</button>
+          <button type="submit" class="btn btn-dash-ghost w-100 mt-1" name="_addanother">Save &amp; add another</button>
+          {% endif %}
+          {% else %}
+          <p class="side-meta">You have view-only access.</p>
+          {% endif %}
+          {% if can_delete %}
+          <a href="{% url 'dashboard:delete' resource.key obj.pk %}" class="side-delete"><i class="bi bi-trash3"></i>Delete this {{ resource.singular|lower }}</a>
+          {% endif %}
+        </section>
+
+        {% if sections|length > 2 or gallery %}
+        <nav class="card-d section-nav" aria-label="Jump to section">
+          <h2 class="side-title">Sections</h2>
+          {% for section in sections %}<a href="#section-{{ forloop.counter }}">{{ section.title }}</a>{% endfor %}
+          {% if gallery %}<a href="#section-gallery">Photo gallery</a>{% endif %}
+        </nav>
+        {% endif %}
+      </div>
+    </aside>
+  </div>
+</form>
+{% endblock %}

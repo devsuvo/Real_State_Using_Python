@@ -1,0 +1,96 @@
+{% with url_name=request.resolver_match.url_name ns=request.resolver_match.namespace %}
+{% if site.topbar_text or site.phone %}
+<div class="topbar d-none d-lg-block">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div class="topbar-left">
+      {% if site.phone %}<a href="tel:{{ site.phone }}"><i class="bi bi-telephone"></i>{{ site.phone }}</a>{% endif %}
+      {% if site.email %}<a href="mailto:{{ site.email }}"><i class="bi bi-envelope"></i>{{ site.email }}</a>{% endif %}
+      {% if site.topbar_text %}<span class="d-none d-xl-inline"><i class="bi bi-award"></i>{{ site.topbar_text }}</span>{% endif %}
+    </div>
+    <div class="topbar-social">
+      {% include "partials/social.html" %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<header class="site-header {% if url_name == 'home' %}is-transparent{% endif %}" id="siteHeader">
+  <nav class="container d-flex align-items-center justify-content-between">
+    {% include "partials/logo.html" %}
+
+    <ul class="main-nav d-none d-lg-flex">
+      <li><a href="{% url 'core:home' %}" class="{% if url_name == 'home' %}active{% endif %}">Home</a></li>
+      <li class="has-dropdown">
+        <a href="{% url 'properties:list' %}" class="{% if ns == 'properties' and url_name != 'agent_list' and url_name != 'agent_detail' %}active{% endif %}">Properties <i class="bi bi-chevron-down"></i></a>
+        <div class="nav-dropdown">
+          <div class="nav-dropdown-col">
+            <h6>Browse</h6>
+            <a href="{% url 'properties:list' %}">All Properties</a>
+            <a href="{% url 'properties:list' %}?status=sale">For Sale</a>
+            <a href="{% url 'properties:list' %}?status=rent">For Rent</a>
+          </div>
+          <div class="nav-dropdown-col">
+            <h6>Lifestyle</h6>
+            {% for t in nav_types %}<a href="{{ t.get_absolute_url }}">{{ t.name }}</a>{% endfor %}
+          </div>
+          <div class="nav-dropdown-col">
+            <h6>Cities</h6>
+            {% for c in nav_cities %}<a href="{{ c.get_absolute_url }}">{{ c.name }}</a>{% endfor %}
+          </div>
+        </div>
+      </li>
+      <li><a href="{% url 'properties:agent_list' %}" class="{% if url_name == 'agent_list' or url_name == 'agent_detail' %}active{% endif %}">Agents</a></li>
+      <li><a href="{% url 'core:about' %}" class="{% if url_name == 'about' %}active{% endif %}">About</a></li>
+      <li><a href="{% url 'blog:list' %}" class="{% if ns == 'blog' %}active{% endif %}">Blog</a></li>
+      <li><a href="{% url 'core:contact' %}" class="{% if url_name == 'contact' %}active{% endif %}">Contact</a></li>
+    </ul>
+
+    <div class="header-actions">
+      <a href="{% url 'core:favorites' %}" class="icon-btn" aria-label="Saved properties">
+        <i class="bi bi-heart"></i>
+        <span class="fav-count" data-fav-count {% if not favorite_count %}hidden{% endif %}>{{ favorite_count }}</span>
+      </a>
+      {% if site.header_button_text %}
+      <a href="{{ site.header_button_link }}" class="btn btn-accent d-none d-md-inline-flex">{{ site.header_button_text }}</a>
+      {% endif %}
+      <button class="icon-btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-label="Open menu">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<div class="offcanvas offcanvas-end mobile-menu" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+  <div class="offcanvas-header">
+    <span id="mobileMenuLabel">{% include "partials/logo.html" with dark=True %}</span>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <ul class="mobile-nav">
+      <li><a href="{% url 'core:home' %}">Home</a></li>
+      <li>
+        <a href="#mPropSub" data-bs-toggle="collapse" role="button" aria-expanded="false">Properties <i class="bi bi-chevron-down"></i></a>
+        <div class="collapse" id="mPropSub">
+          <a href="{% url 'properties:list' %}">All Properties</a>
+          <a href="{% url 'properties:list' %}?status=sale">For Sale</a>
+          <a href="{% url 'properties:list' %}?status=rent">For Rent</a>
+          {% for t in nav_types %}<a href="{{ t.get_absolute_url }}">{{ t.name }}</a>{% endfor %}
+        </div>
+      </li>
+      <li><a href="{% url 'properties:agent_list' %}">Agents</a></li>
+      <li><a href="{% url 'core:about' %}">About</a></li>
+      <li><a href="{% url 'blog:list' %}">Blog</a></li>
+      <li><a href="{% url 'core:contact' %}">Contact</a></li>
+      <li><a href="{% url 'core:favorites' %}">Saved Properties <span class="badge rounded-pill bg-accent ms-1" data-fav-count {% if not favorite_count %}hidden{% endif %}>{{ favorite_count }}</span></a></li>
+    </ul>
+    {% if site.header_button_text %}
+    <a href="{{ site.header_button_link }}" class="btn btn-accent w-100 mt-3">{{ site.header_button_text }}</a>
+    {% endif %}
+    <div class="mobile-contact">
+      {% if site.phone %}<a href="tel:{{ site.phone }}"><i class="bi bi-telephone"></i> {{ site.phone }}</a>{% endif %}
+      {% if site.email %}<a href="mailto:{{ site.email }}"><i class="bi bi-envelope"></i> {{ site.email }}</a>{% endif %}
+      <div class="topbar-social mt-3">{% include "partials/social.html" %}</div>
+    </div>
+  </div>
+</div>
+{% endwith %}

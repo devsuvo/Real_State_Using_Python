@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{% if active_city %}Properties in {{ active_city.name }}{% elif active_type %}{{ active_type.name }} Listings{% else %}Properties{% endif %} — {{ site.site_name }}{% endblock %}
+
+{% block content %}
+{% if active_city %}
+  {% include "partials/page_banner.html" with title="Homes in "|add:active_city.name crumb=active_city.name bg=active_city.img crumb_parent="Properties" crumb_parent_url="/properties/" %}
+{% elif active_type %}
+  {% include "partials/page_banner.html" with title=active_type.name|add:" Listings" crumb=active_type.name bg=active_type.img crumb_parent="Properties" crumb_parent_url="/properties/" %}
+{% elif active_label %}
+  {% include "partials/page_banner.html" with title=active_label.name crumb=active_label.name crumb_parent="Properties" crumb_parent_url="/properties/" %}
+{% else %}
+  {% include "partials/page_banner.html" with title=header.title|default:"Properties" %}
+{% endif %}
+
+<section class="section section-tight">
+  <div class="container">
+    <div class="listing-search">{% include "partials/search_form.html" with compact=True %}</div>
+
+    <div class="row g-4">
+      <div class="col-lg-9 order-1">
+        <div class="listing-toolbar">
+          <p><strong>{{ total }}</strong> propert{{ total|pluralize:"y,ies" }} found</p>
+          <div class="listing-toolbar-right">
+            <form method="get" class="sort-form">
+              {% for key, values in request.GET.lists %}{% if key != 'sort' and key != 'page' %}{% for v in values %}<input type="hidden" name="{{ key }}" value="{{ v }}">{% endfor %}{% endif %}{% endfor %}
+              <label for="sortSel" class="visually-hidden">Sort by</label>
+              <select name="sort" id="sortSel" class="form-select" data-autosubmit>
+                {% for key, label in sort_options %}<option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+              </select>
+            </form>
+            <div class="view-toggle" role="group" aria-label="Layout">
+              <a href="?{% if view_qs %}{{ view_qs }}&{% endif %}view=grid" class="{% if view_mode == 'grid' %}active{% endif %}" aria-label="Grid view"><i class="bi bi-grid-3x3-gap"></i></a>
+              <a href="?{% if view_qs %}{{ view_qs }}&{% endif %}view=list" class="{% if view_mode == 'list' %}active{% endif %}" aria-label="List view"><i class="bi bi-list-ul"></i></a>
+            </div>
+          </div>
+        </div>
+
+        {% if properties %}
+          <div class="row g-4">
+            {% for p in properties %}
+              {% if view_mode == 'list' %}
+                <div class="col-12">{% include "partials/property_card.html" with list_view=True %}</div>
+              {% else %}
+                <div class="col-md-6 col-xl-4">{% include "partials/property_card.html" %}</div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% include "partials/pagination.html" %}
+        {% else %}
+          <div class="empty-state">
+            <i class="bi bi-house-x"></i>
+            <h3>No properties match your search</h3>
+            <p>Try removing a filter or widening your price range.</p>
+            <a href="{% url 'properties:list' %}" class="btn btn-accent">Clear all filters</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <aside class="col-lg-3 order-2">
+        <div class="sidebar-widget">
+          <h4>Property Types</h4>
+          <ul class="widget-list">
+            {% for t in types_with_counts %}
+            <li><a href="{{ t.get_absolute_url }}" class="{% if active_type == t %}active{% endif %}"><span><i class="bi {{ t.icon }}"></i>{{ t.name }}</span><span class="count">{{ t.n }}</span></a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="sidebar-widget">
+          <h4>Cities</h4>
+          <ul class="widget-list">
+            {% for c in nav_cities %}
+            <li><a href="{{ c.get_absolute_url }}" class="{% if active_city == c %}active{% endif %}"><span><i class="bi bi-geo-alt"></i>{{ c.name }}</span><i class="bi bi-chevron-right"></i></a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="sidebar-widget widget-cta">
+          <i class="bi bi-headset"></i>
+          <h4>Need help finding a home?</h4>
+          <p>Tell us what you're looking for and an advisor will send you a personal shortlist.</p>
+          <a href="{% url 'core:contact' %}" class="btn btn-accent w-100">Talk to an advisor</a>
+          {% if site.phone %}<a href="tel:{{ site.phone }}" class="widget-phone"><i class="bi bi-telephone"></i>{{ site.phone }}</a>{% endif %}
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

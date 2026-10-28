@@ -1,0 +1,45 @@
+<div class="modal fade cb-popup" id="sitePopup" tabindex="-1" aria-labelledby="sitePopupTitle" aria-hidden="true"
+     data-popup-id="{{ popup.pk }}-{{ popup.updated|date:'U' }}" data-delay="{{ popup.delay_seconds }}" data-frequency="{{ popup.frequency }}">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <button type="button" class="popup-close" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+      <div class="row g-0">
+        {% if popup.img %}
+        <div class="col-md-5 popup-media" style="background-image:url('{{ popup.img }}')"></div>
+        {% endif %}
+        <div class="{% if popup.img %}col-md-7{% else %}col-12{% endif %}">
+          <div class="popup-body">
+            <div class="popup-content">
+              {% if popup.eyebrow %}<span class="eyebrow">{{ popup.eyebrow }}</span>{% endif %}
+              <h2 id="sitePopupTitle">{{ popup.title }}</h2>
+              {% if popup.text %}<p>{{ popup.text }}</p>{% endif %}
+
+              {% if popup.show_form %}
+              <form method="post" action="{% url 'core:lead' %}" class="popup-form" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <input type="hidden" name="popup_title" value="{{ popup.title }}">
+                <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+                <input type="text" name="name" class="form-control" placeholder="Your name" required aria-label="Your name">
+                <input type="email" name="email" class="form-control" placeholder="Email address" required aria-label="Email address">
+                <input type="tel" name="phone" class="form-control" placeholder="Phone (optional)" aria-label="Phone">
+                <button type="submit" class="btn btn-accent w-100">{{ popup.form_button_text }}</button>
+                <p class="popup-error" hidden>Please enter your name and a valid email.</p>
+              </form>
+              {% elif popup.button_text %}
+              <a href="{{ popup.button_link|default:'#' }}" class="btn btn-accent">{{ popup.button_text }}</a>
+              {% endif %}
+              {% if popup.note %}<p class="popup-note">{{ popup.note }}</p>{% endif %}
+            </div>
+            <div class="popup-success" hidden>
+              <div class="success-icon"><i class="bi bi-check2"></i></div>
+              <h3>You're on the list!</h3>
+              <p>One of our advisors will reach out within one business day.</p>
+              <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Continue browsing</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

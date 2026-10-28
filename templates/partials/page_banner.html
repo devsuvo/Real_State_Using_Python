@@ -1,0 +1,14 @@
+{% firstof bg header.img as bgimg %}
+<section class="page-banner" {% if bgimg %}style="background-image:url('{{ bgimg }}{% if 'unsplash' in bgimg %}&w=1920&q=75{% endif %}')"{% endif %}>
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="crumbs">
+        <li><a href="{% url 'core:home' %}">Home</a></li>
+        {% if crumb_parent %}<li><a href="{{ crumb_parent_url }}">{{ crumb_parent }}</a></li>{% endif %}
+        <li aria-current="page">{% firstof crumb header.title title %}</li>
+      </ol>
+    </nav>
+    <h1>{% firstof title header.title %}</h1>
+    {% firstof subtitle header.subtitle as sub %}{% if sub %}<p>{{ sub }}</p>{% endif %}
+  </div>
+</section>

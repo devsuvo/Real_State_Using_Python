@@ -1,0 +1,60 @@
+{% with bf=item.bf %}
+{% if item.kind == "switch" %}
+  <div class="col-md-6">
+    <label class="switch-row {% if bf.errors %}has-error{% endif %}" for="{{ bf.id_for_label }}">
+      <span class="switch-text">
+        <strong>{{ bf.label }}</strong>
+        {% if bf.help_text %}<small>{{ bf.help_text }}</small>{% endif %}
+      </span>
+      <span class="form-switch m-0">{{ bf }}</span>
+    </label>
+  </div>
+
+{% elif item.kind == "image" %}
+  <div class="col-12">
+    <div class="image-field" data-image-field>
+      <div class="image-preview">
+        <img src="{% if item.preview %}{{ item.preview }}{% if 'unsplash' in item.preview %}&w=640&q=70{% endif %}{% endif %}" alt="" data-preview-img {% if not item.preview %}hidden{% endif %}>
+        <span class="image-empty" data-preview-empty {% if item.preview %}hidden{% endif %}><i class="bi bi-image"></i>No image yet</span>
+      </div>
+      <div class="image-inputs">
+        <label class="form-label" for="{{ bf.id_for_label }}">{{ bf.label }}{% if bf.field.required %} <span class="req">*</span>{% endif %}</label>
+        <input type="file" name="{{ bf.html_name }}" id="{{ bf.id_for_label }}" class="form-control" accept="image/*" data-file-input>
+        {% if bf.value %}
+          <label class="clear-check"><input type="checkbox" name="{{ bf.html_name }}-clear" id="{{ bf.html_name }}-clear_id" class="form-check-input"> Remove uploaded file</label>
+        {% endif %}
+        {% if item.partner %}
+          <label class="form-label mt-3" for="{{ item.partner.id_for_label }}">…or paste an image link</label>
+          <input type="url" name="{{ item.partner.html_name }}" id="{{ item.partner.id_for_label }}" value="{{ item.partner.value|default:'' }}" class="form-control" placeholder="https://images.unsplash.com/…" data-url-input>
+          <small class="field-help">An uploaded file takes priority over the link.</small>
+          {% for e in item.partner.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        {% endif %}
+        {% for e in bf.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+
+{% elif item.kind == "checks" %}
+  <div class="col-12">
+    <span class="form-label d-block">{{ bf.label }}</span>
+    <div class="check-chips">
+      {% for opt in bf %}
+        <label class="check-chip">{{ opt.tag }}<span>{{ opt.choice_label }}</span></label>
+      {% endfor %}
+    </div>
+    {% for e in bf.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+  </div>
+
+{% else %}
+  <div class="{% if item.wide %}col-12{% else %}col-md-6{% endif %}">
+    <label class="form-label" for="{{ bf.id_for_label }}">{{ bf.label }}{% if bf.field.required %} <span class="req">*</span>{% endif %}</label>
+    {% if bf.name == "icon" %}
+      <div class="input-group icon-input"><span class="input-group-text"><i class="bi {{ bf.value|default:'bi-question' }}" data-icon-preview></i></span>{{ bf }}</div>
+    {% else %}
+      <div class="{% if bf.errors %}is-invalid-wrap{% endif %}">{{ bf }}</div>
+    {% endif %}
+    {% if bf.help_text %}<small class="field-help">{{ bf.help_text }}</small>{% endif %}
+    {% for e in bf.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+  </div>
+{% endif %}
+{% endwith %}

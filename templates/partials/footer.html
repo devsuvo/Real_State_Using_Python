@@ -1,0 +1,64 @@
+{% load static %}
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-newsletter">
+      <div>
+        <h3>Get new listings before anyone else</h3>
+        <p>One curated email a week. Unsubscribe anytime.</p>
+      </div>
+      <form method="post" action="{% url 'core:subscribe' %}" class="newsletter-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <label for="footerEmail" class="visually-hidden">Email address</label>
+        <input type="email" name="email" id="footerEmail" placeholder="Your email address" required>
+        <button type="submit" class="btn btn-accent">Subscribe</button>
+      </form>
+    </div>
+
+    <div class="row g-4 footer-main">
+      <div class="col-lg-4 col-md-6">
+        {% include "partials/logo.html" %}
+        <p class="footer-about">{{ site.footer_about }}</p>
+        <ul class="footer-contact">
+          {% if site.address %}<li><i class="bi bi-geo-alt"></i>{{ site.address }}</li>{% endif %}
+          {% if site.phone %}<li><i class="bi bi-telephone"></i><a href="tel:{{ site.phone }}">{{ site.phone }}</a></li>{% endif %}
+          {% if site.email %}<li><i class="bi bi-envelope"></i><a href="mailto:{{ site.email }}">{{ site.email }}</a></li>{% endif %}
+          {% if site.office_hours %}<li><i class="bi bi-clock"></i>{{ site.office_hours }}</li>{% endif %}
+        </ul>
+      </div>
+      <div class="col-lg-2 col-md-3 col-6">
+        <h4>Discover</h4>
+        <ul class="footer-links">
+          {% for c in nav_cities %}<li><a href="{{ c.get_absolute_url }}">{{ c.name }}</a></li>{% endfor %}
+        </ul>
+      </div>
+      <div class="col-lg-2 col-md-3 col-6">
+        <h4>Lifestyle</h4>
+        <ul class="footer-links">
+          {% for t in nav_types %}<li><a href="{{ t.get_absolute_url }}">{{ t.name }}</a></li>{% endfor %}
+        </ul>
+      </div>
+      <div class="col-lg-2 col-md-6 col-6">
+        <h4>Deals</h4>
+        <ul class="footer-links">
+          {% for l in nav_labels %}<li><a href="{{ l.get_absolute_url }}">{{ l.name }}</a></li>{% endfor %}
+        </ul>
+      </div>
+      <div class="col-lg-2 col-md-6 col-6">
+        <h4>Company</h4>
+        <ul class="footer-links">
+          <li><a href="{% url 'core:about' %}">About Us</a></li>
+          <li><a href="{% url 'properties:agent_list' %}">Our Agents</a></li>
+          <li><a href="{% url 'blog:list' %}">Blog</a></li>
+          <li><a href="{% url 'core:contact' %}">Contact</a></li>
+          <li><a href="{% url 'core:favorites' %}">Saved Homes</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>{{ site.copyright_text }}</p>
+      <div class="topbar-social">{% include "partials/social.html" %}</div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Blog — {{ site.site_name }}{% endblock %}
+
+{% block content %}
+{% if active_category %}
+  {% include "partials/page_banner.html" with title=active_category.name crumb=active_category.name crumb_parent="Blog" crumb_parent_url="/blog/" %}
+{% else %}
+  {% include "partials/page_banner.html" with title=header.title|default:"Blog" %}
+{% endif %}
+
+<section class="section">
+  <div class="container">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-8">
+        {% if request.GET.q %}<p class="mb-4">Results for <strong>“{{ request.GET.q }}”</strong> — <a href="{% url 'blog:list' %}">clear</a></p>{% endif %}
+        <div class="row g-4">
+          {% for post in posts %}
+          <div class="col-md-6">{% include "partials/post_card.html" %}</div>
+          {% empty %}
+          <div class="col-12"><div class="empty-state"><i class="bi bi-journal-x"></i><h3>No articles found</h3><a href="{% url 'blog:list' %}" class="btn btn-accent">See all articles</a></div></div>
+          {% endfor %}
+        </div>
+        {% include "partials/pagination.html" %}
+      </div>
+      <aside class="col-lg-4">{% include "blog/sidebar.html" %}</aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

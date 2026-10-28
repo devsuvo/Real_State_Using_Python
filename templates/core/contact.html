@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Contact — {{ site.site_name }}{% endblock %}
+
+{% block content %}
+{% include "partials/page_banner.html" with title=header.title|default:"Contact Us" %}
+
+<section class="section">
+  <div class="container">
+    <div class="row g-4 contact-cards">
+      {% if site.phone %}
+      <div class="col-md-6 col-lg-3"><div class="info-card"><i class="bi bi-telephone"></i><h3>Call us</h3><a href="tel:{{ site.phone }}">{{ site.phone }}</a></div></div>
+      {% endif %}
+      {% if site.email %}
+      <div class="col-md-6 col-lg-3"><div class="info-card"><i class="bi bi-envelope"></i><h3>Email us</h3><a href="mailto:{{ site.email }}">{{ site.email }}</a></div></div>
+      {% endif %}
+      {% if site.address %}
+      <div class="col-md-6 col-lg-3"><div class="info-card"><i class="bi bi-geo-alt"></i><h3>Visit us</h3><span>{{ site.address }}</span></div></div>
+      {% endif %}
+      {% if site.office_hours %}
+      <div class="col-md-6 col-lg-3"><div class="info-card"><i class="bi bi-clock"></i><h3>Office hours</h3><span>{{ site.office_hours }}</span></div></div>
+      {% endif %}
+    </div>
+
+    <div class="row g-4 g-xl-5 mt-2">
+      <div class="col-lg-7">
+        <div class="form-panel">
+          {% include "partials/section_heading.html" with eyebrow="Send a message" title="How can we help?" subtitle="Buying, selling, renting or just curious about the market — tell us a little and the right advisor will reply within one business day." align="left" %}
+          {% include "partials/contact_form.html" %}
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="map-frame map-frame-tall">
+          {% if site.map_embed_url %}
+          <iframe src="{{ site.map_embed_url }}" title="Office location" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          {% else %}
+          <iframe src="https://maps.google.com/maps?q={{ site.address|urlencode }}&z=14&output=embed" title="Office location" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          {% endif %}
+        </div>
+        <div class="social-round mt-4">{% include "partials/social.html" %}</div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

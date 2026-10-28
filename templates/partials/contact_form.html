@@ -1,0 +1,22 @@
+<form method="post" class="cb-form" novalidate>
+  {% csrf_token %}
+  <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <div class="row g-3">
+    {% for field in form %}
+      {% if field.name != "website" %}
+      <div class="{% if stacked or field.name == 'message' %}col-12{% else %}col-md-6{% endif %}">
+        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}{% if field.field.required %} <span class="req">*</span>{% endif %}</label>
+        {% if field.errors %}
+          <div class="is-invalid-wrap">{{ field }}</div>
+          <div class="field-error">{{ field.errors.0 }}</div>
+        {% else %}
+          {{ field }}
+        {% endif %}
+      </div>
+      {% endif %}
+    {% endfor %}
+    <div class="col-12">
+      <button type="submit" class="btn btn-accent btn-lg{% if stacked %} w-100{% endif %}">{{ submit_label|default:"Send Message" }} <i class="bi bi-send ms-1"></i></button>
+    </div>
+  </div>
+</form>

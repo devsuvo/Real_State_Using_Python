@@ -1,0 +1,104 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }} · {{ site.site_name }} Dashboard</title>
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
+  <style>:root{--d-accent:{{ site.accent_color|default:'#12A4B0' }};--d-navy:{{ site.primary_color|default:'#0E2A47' }};}</style>
+</head>
+<body class="dash">
+<div class="dash-shell">
+
+  <aside class="dash-sidebar" id="dashSidebar" aria-label="Dashboard navigation">
+    <div class="dash-brand">
+      <a href="{% url 'dashboard:overview' %}">
+        <span class="dash-brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 4 12v17h8v-9h8v9h8V12z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span>
+        <span class="dash-brand-text">{{ site.site_name }}<small>Dashboard</small></span>
+      </a>
+      <button class="dash-sidebar-close d-lg-none" type="button" data-sidebar-close aria-label="Close menu"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <nav class="dash-nav">
+      <a href="{% url 'dashboard:overview' %}" class="dash-nav-link {% if request.resolver_match.url_name == 'overview' %}active{% endif %}">
+        <i class="bi bi-speedometer2"></i><span>Overview</span>
+      </a>
+      {% for group, items in nav %}
+        <div class="dash-nav-group">{{ group }}</div>
+        {% for r in items %}
+          {% if r.singleton %}{% url 'dashboard:singleton' r.key as link %}{% else %}{% url 'dashboard:list' r.key as link %}{% endif %}
+          <a href="{{ link }}" class="dash-nav-link {% if resource.key == r.key %}active{% endif %}">
+            <i class="bi {{ r.icon }}"></i><span>{{ r.label }}</span>
+            {% if r.key == 'messages' and unread_count %}<em class="dash-nav-badge">{{ unread_count }}</em>{% endif %}
+          </a>
+        {% endfor %}
+      {% endfor %}
+    </nav>
+
+    <div class="dash-sidebar-foot">
+      <a href="/" target="_blank" rel="noopener" class="dash-nav-link"><i class="bi bi-box-arrow-up-right"></i><span>View website</span></a>
+    </div>
+  </aside>
+  <div class="dash-overlay" data-sidebar-close></div>
+
+  <div class="dash-main">
+    <header class="dash-topbar">
+      <button class="dash-icon-btn d-lg-none" type="button" data-sidebar-open aria-label="Open menu"><i class="bi bi-list"></i></button>
+      <a href="{% url 'dashboard:overview' %}" class="dash-topbar-brand d-sm-none"><span class="dash-brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 4 12v17h8v-9h8v9h8V12z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span>{{ site.site_name }}</a>
+      <form class="dash-search" method="get" action="{% url 'dashboard:search' %}" role="search">
+        <i class="bi bi-search"></i>
+        <input type="search" name="q" value="{{ q|default:'' }}" placeholder="Search properties, posts, leads…" aria-label="Search the dashboard">
+      </form>
+      <div class="dash-topbar-right">
+        <a href="{% url 'dashboard:list' 'messages' %}" class="dash-icon-btn" aria-label="Inbox">
+          <i class="bi bi-bell"></i>{% if unread_count %}<span class="dash-dot"></span>{% endif %}
+        </a>
+        <div class="dropdown">
+          <button class="dash-user" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="dash-avatar">{{ request.user.get_username|slice:":1"|upper }}</span>
+            <span class="d-none d-md-inline">{{ request.user.get_full_name|default:request.user.get_username }}</span>
+            <i class="bi bi-chevron-down small"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end dash-dropdown">
+            <li><a class="dropdown-item" href="/" target="_blank" rel="noopener"><i class="bi bi-globe2"></i>View website</a></li>
+            <li><a class="dropdown-item" href="{% url 'dashboard:password' %}"><i class="bi bi-key"></i>Change password</a></li>
+            {% if request.user.is_superuser %}<li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear"></i>Advanced (Django admin)</a></li>{% endif %}
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form method="post" action="{% url 'dashboard:logout' %}">{% csrf_token %}
+                <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right"></i>Log out</button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main class="dash-content">
+      {% if messages %}
+      <div class="dash-alerts">
+        {% for m in messages %}
+        <div class="dash-alert dash-alert-{{ m.tags }}" role="status">
+          <i class="bi {% if m.tags == 'error' %}bi-exclamation-octagon{% elif m.tags == 'warning' %}bi-exclamation-triangle{% else %}bi-check-circle{% endif %}"></i>
+          <span>{{ m }}</span>
+          <button type="button" class="dash-alert-close" aria-label="Dismiss">&times;</button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+<script src="{% static 'dashboard/dashboard.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Page not found — {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<section class="section error-page">
+  <div class="container text-center">
+    <span class="error-code">404</span>
+    <h1>This address isn't on the map</h1>
+    <p>The page you were looking for may have moved, sold, or never existed.</p>
+    <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
+      <a href="{% url 'core:home' %}" class="btn btn-accent btn-lg">Back to home</a>
+      <a href="{% url 'properties:list' %}" class="btn btn-outline-primary btn-lg">Browse properties</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<div class="dash-head">
+  <div>
+    <h1>{% if q %}Results for “{{ q }}”{% else %}Search{% endif %}</h1>
+    <p>Searches listings, agents, blog posts, messages, subscribers and more.</p>
+  </div>
+</div>
+
+{% if not q %}
+  <div class="card-d empty-d"><i class="bi bi-search"></i><p>Type something in the search bar above.</p></div>
+{% elif not results %}
+  <div class="card-d empty-d"><i class="bi bi-emoji-neutral"></i><p>Nothing found for “{{ q }}”.</p></div>
+{% else %}
+  <div class="row g-4">
+    {% for group in results %}
+    <div class="col-lg-6">
+      <section class="card-d h-100">
+        <header class="card-d-head">
+          <div><h2><i class="bi {{ group.resource.icon }} me-2"></i>{{ group.resource.label }}</h2></div>
+          <a href="{% url 'dashboard:list' group.resource.key %}?q={{ q|urlencode }}" class="card-d-link">See all <i class="bi bi-arrow-right"></i></a>
+        </header>
+        <ul class="search-hits">
+          {% for obj, url in group.hits %}<li><a href="{{ url }}">{{ obj }}</a></li>{% endfor %}
+        </ul>
+      </section>
+    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<div class="dash-head">
+  <div>
+    <h1>{{ resource.label }} <span class="count-pill">{{ total }}</span></h1>
+    {% if resource.description %}<p>{{ resource.description }}</p>{% endif %}
+  </div>
+  <div class="dash-head-actions">
+    {% if resource.key == 'messages' or resource.key == 'subscribers' %}
+      <a href="{% url 'dashboard:export' resource.key %}" class="btn btn-dash-light"><i class="bi bi-download"></i>Export CSV</a>
+    {% endif %}
+    {% if can_add %}
+      <a href="{% url 'dashboard:add' resource.key %}" class="btn btn-dash"><i class="bi bi-plus-lg"></i>Add {{ resource.singular|lower }}</a>
+    {% endif %}
+  </div>
+</div>
+
+<section class="card-d p-0">
+  <form method="get" class="list-tools">
+    {% if resource.search %}
+    <div class="list-search">
+      <i class="bi bi-search"></i>
+      <input type="search" name="q" value="{{ q }}" placeholder="Search {{ resource.label|lower }}…" aria-label="Search {{ resource.label|lower }}">
+    </div>
+    {% endif %}
+    {% for f in filters %}
+      <select name="{{ f.name }}" class="form-select" data-autosubmit aria-label="Filter by {{ f.label }}">
+        <option value="">{{ f.label }}: All</option>
+        {% for v, l in f.choices %}<option value="{{ v }}" {% if f.value == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+      </select>
+    {% endfor %}
+    {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+    {% if q or active_filters %}<a href="{% url 'dashboard:list' resource.key %}" class="btn btn-dash-ghost"><i class="bi bi-x-circle"></i>Clear</a>{% endif %}
+  </form>
+
+  {% if rows %}
+  <form method="post" action="{% url 'dashboard:bulk' resource.key %}" id="bulkForm">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <div class="bulk-bar" hidden>
+      <span><strong data-bulk-count>0</strong> selected</span>
+      <select name="action" class="form-select form-select-sm" aria-label="Bulk action">
+        {% if resource.key == 'messages' %}<option value="mark_read">Mark as read</option><option value="mark_unread">Mark as unread</option>{% endif %}
+        {% for t, label in toggle_labels.items %}<option value="set:{{ t }}">Set “{{ label }}” on</option><option value="unset:{{ t }}">Set “{{ label }}” off</option>{% endfor %}
+        {% if can_delete %}<option value="delete">Delete selected</option>{% endif %}
+      </select>
+      <button type="submit" class="btn btn-sm btn-dash" data-bulk-submit>Apply</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th class="col-check"><input type="checkbox" class="form-check-input" data-check-all aria-label="Select all"></th>
+            {% for c in resource.columns %}
+              <th>
+                {% if c.sortable %}
+                  {% if sort == c.name %}<a href="?{% if query_string %}{{ query_string }}&{% endif %}sort=-{{ c.name }}" class="sort is-asc">{{ c.label }} <i class="bi bi-arrow-up"></i></a>
+                  {% elif sort == '-'|add:c.name %}<a href="?{% if query_string %}{{ query_string }}&{% endif %}sort={{ c.name }}" class="sort is-desc">{{ c.label }} <i class="bi bi-arrow-down"></i></a>
+                  {% else %}<a href="?{% if query_string %}{{ query_string }}&{% endif %}sort={{ c.name }}" class="sort">{{ c.label }} <i class="bi bi-arrow-down-up"></i></a>{% endif %}
+                {% else %}{{ c.label }}{% endif %}
+              </th>
+            {% endfor %}
+            <th class="col-actions"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          {% with o=row.obj %}
+          <tr class="{% if resource.key == 'messages' and not o.is_read %}is-unread{% endif %}">
+            <td class="col-check"><input type="checkbox" class="form-check-input" name="ids" value="{{ o.pk }}" aria-label="Select {{ o }}"></td>
+            {% for cell in row.cells %}
+              <td>{% if cell.toggle %}<input type="checkbox" class="form-check-input dash-switch" role="switch" aria-label="{{ cell.label }}" data-toggle-url="{% url 'dashboard:toggle' resource.key o.pk cell.toggle %}" {% if cell.value %}checked{% endif %} {% if not can_change %}disabled{% endif %}>{% else %}{{ cell.html }}{% endif %}</td>
+            {% endfor %}
+            <td class="col-actions">
+              {% if resource.can_edit or resource.key == 'messages' %}
+              <a href="{% url 'dashboard:edit' resource.key o.pk %}" class="row-btn" aria-label="Edit {{ o }}"><i class="bi {% if resource.key == 'messages' %}bi-eye{% else %}bi-pencil{% endif %}"></i></a>
+              {% endif %}
+              {% if o.get_absolute_url %}<a href="{{ o.get_absolute_url }}" target="_blank" rel="noopener" class="row-btn" aria-label="View on website"><i class="bi bi-box-arrow-up-right"></i></a>{% endif %}
+              {% if can_delete %}<a href="{% url 'dashboard:delete' resource.key o.pk %}" class="row-btn is-danger" aria-label="Delete {{ o }}"><i class="bi bi-trash3"></i></a>{% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </form>
+
+  {% if page_obj.has_other_pages %}
+  <div class="list-foot">
+    <span>Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ total }}</span>
+    <nav class="dash-pager" aria-label="Pagination">
+      {% if page_obj.has_previous %}<a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous"><i class="bi bi-chevron-left"></i></a>{% endif %}
+      {% for n in page_obj.paginator.page_range %}
+        {% if n == page_obj.number %}<span class="active">{{ n }}</span>
+        {% elif n > page_obj.number|add:'-3' and n < page_obj.number|add:'3' %}<a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ n }}">{{ n }}</a>{% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}<a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next"><i class="bi bi-chevron-right"></i></a>{% endif %}
+    </nav>
+  </div>
+  {% endif %}
+  {% else %}
+    <div class="empty-d">
+      <i class="bi {{ resource.icon }}"></i>
+      {% if q or active_filters %}
+        <p>Nothing matches your search or filters.</p>
+        <a href="{% url 'dashboard:list' resource.key %}" class="btn btn-dash-light">Clear filters</a>
+      {% else %}
+        <p>No {{ resource.label|lower }} yet.</p>
+        {% if can_add %}<a href="{% url 'dashboard:add' resource.key %}" class="btn btn-dash"><i class="bi bi-plus-lg"></i>Add the first one</a>{% endif %}
+      {% endif %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ agent.name }} — {{ site.site_name }}{% endblock %}
+
+{% block content %}
+{% url 'properties:agent_list' as agents_url %}
+{% include "partials/page_banner.html" with title=agent.name crumb=agent.name crumb_parent="Agents" crumb_parent_url=agents_url subtitle=agent.title %}
+
+<section class="section section-tight">
+  <div class="container">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-8">
+        <div class="agent-profile">
+          <img src="{{ agent.img }}{% if 'unsplash' in agent.img %}&w=600&h=700&fit=crop&crop=faces&q=75{% endif %}" alt="{{ agent.name }}" class="agent-profile-img">
+          <div class="agent-profile-body">
+            <span class="eyebrow">{{ agent.title }}</span>
+            <h2>{{ agent.name }}</h2>
+            <ul class="agent-profile-meta">
+              {% if agent.phone %}<li><i class="bi bi-telephone"></i><a href="tel:{{ agent.phone }}">{{ agent.phone }}</a></li>{% endif %}
+              {% if agent.email %}<li><i class="bi bi-envelope"></i><a href="mailto:{{ agent.email }}">{{ agent.email }}</a></li>{% endif %}
+              {% if agent.languages %}<li><i class="bi bi-translate"></i>{{ agent.languages }}</li>{% endif %}
+              <li><i class="bi bi-house-door"></i>{{ listings|length }} active listing{{ listings|length|pluralize }}</li>
+            </ul>
+            <div class="prose">{{ agent.bio|linebreaks }}</div>
+            <div class="social-round">
+              {% if agent.facebook %}<a href="{{ agent.facebook }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
+              {% if agent.instagram %}<a href="{{ agent.instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>{% endif %}
+              {% if agent.linkedin %}<a href="{{ agent.linkedin }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside class="col-lg-4">
+        <div class="sidebar-widget inquiry-widget" id="contact-agent">
+          <h4>Contact {{ agent.name }}</h4>
+          {% include "partials/contact_form.html" with stacked=True submit_label="Send Message" %}
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+{% if listings %}
+<section class="section section-alt">
+  <div class="container">
+    {% include "partials/section_heading.html" with eyebrow="Portfolio" title="Listings by "|add:agent.name %}
+    <div class="row g-4">
+      {% for p in listings %}<div class="col-md-6 col-lg-4">{% include "partials/property_card.html" %}</div>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

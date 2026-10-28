@@ -1,0 +1,40 @@
+{% load humanize %}
+<article class="property-card {% if list_view %}is-list{% endif %}">
+  <div class="property-card-media">
+    <a href="{{ p.get_absolute_url }}" class="property-card-img" aria-label="{{ p.title }}">
+      <img src="{{ p.img }}{% if 'unsplash' in p.img %}&w=800&q=75{% endif %}" alt="{{ p.title }}" loading="lazy">
+    </a>
+    <div class="property-badges">
+      {% if p.is_featured %}<span class="badge-pill badge-featured">Featured</span>{% endif %}
+      <span class="badge-pill badge-status">{{ p.get_status_display }}</span>
+      {% if p.label %}<span class="badge-pill" style="background:{{ p.label.color }}">{{ p.label.name }}</span>{% endif %}
+    </div>
+    <button type="button" class="fav-btn {% if p.pk in favorite_ids %}is-active{% endif %}" data-fav="{{ p.pk }}"
+            data-url="{% url 'core:toggle_favorite' p.pk %}" aria-label="Save {{ p.title }}" aria-pressed="{% if p.pk in favorite_ids %}true{% else %}false{% endif %}">
+      <i class="bi bi-heart"></i><i class="bi bi-heart-fill"></i>
+    </button>
+    <div class="property-card-price">
+      ${{ p.price|intcomma }}{% if p.price_suffix %}<small>{{ p.price_suffix }}</small>{% endif %}
+    </div>
+  </div>
+  <div class="property-card-body">
+    {% if p.property_type %}<span class="property-type">{{ p.property_type.name }}</span>{% endif %}
+    <h3 class="property-title"><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></h3>
+    <p class="property-address"><i class="bi bi-geo-alt"></i>{{ p.address }}{% if p.city %}, {{ p.city.name }}{% endif %}</p>
+    {% if list_view and p.excerpt %}<p class="property-excerpt">{{ p.excerpt }}</p>{% endif %}
+    <ul class="property-meta">
+      <li title="Bedrooms"><i class="bi bi-door-closed"></i><strong>{{ p.bedrooms }}</strong> Beds</li>
+      <li title="Bathrooms"><i class="bi bi-droplet"></i><strong>{{ p.baths_display }}</strong> Baths</li>
+      <li title="Living area"><i class="bi bi-arrows-angle-expand"></i><strong>{{ p.area|intcomma }}</strong> ft²</li>
+    </ul>
+  </div>
+  {% if p.agent %}
+  <div class="property-card-footer">
+    <a href="{{ p.agent.get_absolute_url }}" class="agent-mini">
+      <img src="{{ p.agent.img }}{% if 'unsplash' in p.agent.img %}&w=80&h=80&fit=crop&q=70{% endif %}" alt="" loading="lazy">
+      <span>{{ p.agent.name }}</span>
+    </a>
+    <span class="text-muted small"><i class="bi bi-calendar3 me-1"></i>{{ p.created|date:"M j, Y" }}</span>
+  </div>
+  {% endif %}
+</article>

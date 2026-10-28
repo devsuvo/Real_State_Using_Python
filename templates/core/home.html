@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block body_class %}page-home{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-slides" aria-hidden="true">
+    {% for s in slides %}
+      <div class="hero-slide {% if forloop.first %}is-active{% endif %}" style="background-image:url('{{ s.img }}{% if 'unsplash' in s.img %}&w=2000&q=80{% endif %}')"></div>
+    {% empty %}
+      <div class="hero-slide is-active"></div>
+    {% endfor %}
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      {% if site.hero_badge %}<span class="hero-badge"><i class="bi bi-gem"></i>{{ site.hero_badge }}</span>{% endif %}
+      <h1>{{ site.hero_title }}</h1>
+      <p>{{ site.hero_subtitle }}</p>
+    </div>
+    {% include "partials/search_form.html" %}
+    {% if slides|length > 1 %}
+    <div class="hero-dots" role="tablist" aria-label="Background slides">
+      {% for s in slides %}<button type="button" class="{% if forloop.first %}is-active{% endif %}" data-slide="{{ forloop.counter0 }}" aria-label="Show slide {{ forloop.counter }}"></button>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- STATS -->
+{% if stats %}
+<section class="stats-strip">
+  <div class="container">
+    <div class="stats-grid">
+      {% for s in stats %}
+      <div class="stat">
+        <span class="stat-value">{{ s.prefix }}<span data-count="{{ s.value }}">0</span>{{ s.suffix }}</span>
+        <span class="stat-label">{{ s.label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- FEATURED -->
+{% if site.show_featured and featured %}
+<section class="section">
+  <div class="container">
+    <div class="section-head-row">
+      {% include "partials/section_heading.html" with eyebrow="Featured Listings" title=site.featured_title subtitle=site.featured_subtitle align="left" %}
+      <div class="slider-nav">
+        <button type="button" class="slider-btn featured-prev" aria-label="Previous"><i class="bi bi-arrow-left"></i></button>
+        <button type="button" class="slider-btn featured-next" aria-label="Next"><i class="bi bi-arrow-right"></i></button>
+      </div>
+    </div>
+    <div class="swiper featured-swiper">
+      <div class="swiper-wrapper">
+        {% for p in featured %}
+        <div class="swiper-slide">{% include "partials/property_card.html" %}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- WHY US -->
+{% if site.show_features and features %}
+<section class="section section-alt">
+  <div class="container">
+    {% include "partials/section_heading.html" with eyebrow="Why Crystal Bay" title=site.features_title subtitle=site.features_subtitle %}
+    <div class="row g-4">
+      {% for f in features %}
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi {{ f.icon }}"></i></div>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.description }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- LIFESTYLES -->
+{% if site.show_types and types %}
+<section class="section">
+  <div class="container">
+    {% include "partials/section_heading.html" with eyebrow="Lifestyles" title=site.types_title subtitle=site.types_subtitle %}
+    <div class="row g-4">
+      {% for t in types %}
+      <div class="col-6 col-lg-3">
+        <a href="{{ t.get_absolute_url }}" class="type-card">
+          <img src="{{ t.img }}{% if 'unsplash' in t.img %}&w=700&q=75{% endif %}" alt="" loading="lazy">
+          <div class="type-card-body">
+            <span class="type-icon"><i class="bi {{ t.icon }}"></i></span>
+            <h3>{{ t.name }}</h3>
+            <span class="type-count">{{ t.n }} Propert{{ t.n|pluralize:"y,ies" }}</span>
+            <span class="type-more">More details <i class="bi bi-arrow-right"></i></span>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- LATEST -->
+{% if site.show_latest and latest %}
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head-row">
+      {% include "partials/section_heading.html" with eyebrow="New on the Market" title=site.latest_title subtitle=site.latest_subtitle align="left" %}
+      <a href="{% url 'properties:list' %}" class="btn btn-outline-primary">View all properties <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for p in latest %}
+      <div class="col-md-6 col-lg-4">{% include "partials/property_card.html" %}</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CITIES -->
+{% if site.show_cities and cities %}
+<section class="section">
+  <div class="container">
+    {% include "partials/section_heading.html" with eyebrow="Locations" title=site.cities_title subtitle=site.cities_subtitle %}
+    <div class="city-grid">
+      {% for c in cities %}
+      <a href="{{ c.get_absolute_url }}" class="city-card city-card-{{ forloop.counter }}">
+        <img src="{{ c.img }}{% if 'unsplash' in c.img %}&w=1000&q=75{% endif %}" alt="" loading="lazy">
+        <div class="city-card-body">
+          <span class="city-count">{{ c.n }} Propert{{ c.n|pluralize:"y,ies" }}</span>
+          <h3>{{ c.name }}</h3>
+          <span class="city-more">Explore <i class="bi bi-arrow-up-right"></i></span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA -->
+{% if site.show_cta %}
+<section class="cta-band" {% if site.cta_img %}style="background-image:url('{{ site.cta_img }}{% if 'unsplash' in site.cta_img %}&w=1920&q=75{% endif %}')"{% endif %}>
+  <div class="container">
+    <div class="cta-inner">
+      <div>
+        <h2>{{ site.cta_title }}</h2>
+        {% if site.cta_text %}<p>{{ site.cta_text }}</p>{% endif %}
+      </div>
+      <a href="{{ site.cta_button_link }}" class="btn btn-accent btn-lg">{{ site.cta_button_text }}</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- PRICING -->
+{% if site.show_pricing and plans %}
+<section class="section">
+  <div class="container">
+    {% include "partials/section_heading.html" with eyebrow="Membership" title=site.pricing_title subtitle=site.pricing_subtitle %}
+    <div class="row g-4 justify-content-center">
+      {% for plan in plans %}
+      <div class="col-md-6 col-lg-4">
+        <div class="pricing-card {% if plan.is_popular %}is-popular{% endif %}">
+          {% if plan.is_popular %}<span class="pricing-flag">Most Popular</span>{% endif %}
+          <h3>{{ plan.name }}</h3>
+          {% if plan.description %}<p class="pricing-desc">{{ plan.description }}</p>{% endif %}
+          <div class="pricing-price"><sup>$</sup>{{ plan.price|floatformat:"-2"|intcomma }}<span>/ {{ plan.period }}</span></div>
+          <ul>
+            {% for line in plan.feature_list %}<li><i class="bi bi-check2"></i>{{ line }}</li>{% endfor %}
+          </ul>
+          <a href="{{ plan.button_link }}{% if '?' not in plan.button_link %}?subject={{ plan.name|urlencode }}%20plan{% endif %}" class="btn {% if plan.is_popular %}btn-accent{% else %}btn-outline-primary{% endif %} w-100">{{ plan.button_text }}</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- TESTIMONIALS -->
+{% if site.show_testimonials and testimonials %}
+  {% include "partials/testimonials.html" %}
+{% endif %}
+
+<!-- AGENTS -->
+{% if site.show_agents and agents %}
+<section class="section">
+  <div class="container">
+    <div class="section-head-row">
+      {% include "partials/section_heading.html" with eyebrow="Our Team" title=site.agents_title subtitle=site.agents_subtitle align="left" %}
+      <a href="{% url 'properties:agent_list' %}" class="btn btn-outline-primary">All agents <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for a in agents %}
+      <div class="col-6 col-lg-3">{% include "partials/agent_card.html" %}</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- BLOG -->
+{% if site.show_blog and posts %}
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head-row">
+      {% include "partials/section_heading.html" with eyebrow="Journal" title=site.blog_title subtitle=site.blog_subtitle align="left" %}
+      <a href="{% url 'blog:list' %}" class="btn btn-outline-primary">Read the blog <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for post in posts %}
+      <div class="col-md-6 col-lg-4">{% include "partials/post_card.html" %}</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- CONTACT -->
+{% if site.show_contact %}
+<section class="section" id="contact">
+  <div class="container">
+    <div class="contact-split">
+      <div class="contact-split-media" {% if site.contact_img %}style="background-image:url('{{ site.contact_img }}{% if 'unsplash' in site.contact_img %}&w=1200&q=75{% endif %}')"{% endif %}>
+        <div class="contact-split-card">
+          <h3>Talk to a local expert</h3>
+          {% if site.phone %}<a href="tel:{{ site.phone }}"><i class="bi bi-telephone"></i>{{ site.phone }}</a>{% endif %}
+          {% if site.email %}<a href="mailto:{{ site.email }}"><i class="bi bi-envelope"></i>{{ site.email }}</a>{% endif %}
+          {% if site.office_hours %}<span><i class="bi bi-clock"></i>{{ site.office_hours }}</span>{% endif %}
+        </div>
+      </div>
+      <div class="contact-split-form">
+        {% include "partials/section_heading.html" with eyebrow="Contact" title=site.contact_title subtitle=site.contact_subtitle align="left" %}
+        {% include "partials/contact_form.html" %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "dashboard/base.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="dash-head">
+  <div>
+    <a href="{% url 'dashboard:list' 'messages' %}" class="back-link"><i class="bi bi-arrow-left"></i>Messages &amp; Leads</a>
+    <h1>{{ msg.subject|default:"Message from "|add:msg.name }}</h1>
+    <p>{{ msg.get_source_display }} · received {{ msg.created|date:"M j, Y · g:i A" }} ({{ msg.created|naturaltime }})</p>
+  </div>
+  <div class="dash-head-actions">
+    <a href="mailto:{{ msg.email }}?subject=Re: {{ msg.subject|default:'Your enquiry'|urlencode }}" class="btn btn-dash"><i class="bi bi-reply"></i>Reply by email</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <section class="card-d">
+      <div class="msg-from">
+        <span class="dash-avatar is-lg">{{ msg.name|slice:":1"|upper }}</span>
+        <div>
+          <strong>{{ msg.name }}</strong>
+          <a href="mailto:{{ msg.email }}">{{ msg.email }}</a>
+        </div>
+      </div>
+      <div class="msg-body">{{ msg.message|default:"(No message — this lead came from a sign-up form.)"|linebreaks }}</div>
+    </section>
+
+    {% if others %}
+    <section class="card-d mt-4">
+      <header class="card-d-head"><div><h2>Earlier messages from this person</h2></div></header>
+      <ul class="lead-list">
+        {% for m in others %}
+        <li><a href="{% url 'dashboard:edit' 'messages' m.pk %}">
+          <span class="lead-main"><strong>{{ m.subject|default:m.get_source_display }}</strong><small>{{ m.message|truncatechars:70 }}</small></span>
+          <span class="lead-meta"><small>{{ m.created|date:"M j, Y" }}</small></span>
+        </a></li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </div>
+
+  <aside class="col-lg-4">
+    <section class="card-d">
+      <h2 class="side-title">Contact details</h2>
+      <dl class="detail-list">
+        <div><dt>Email</dt><dd><a href="mailto:{{ msg.email }}">{{ msg.email }}</a></dd></div>
+        <div><dt>Phone</dt><dd>{% if msg.phone %}<a href="tel:{{ msg.phone }}">{{ msg.phone }}</a>{% else %}—{% endif %}</dd></div>
+        <div><dt>Source</dt><dd><span class="pill">{{ msg.get_source_display }}</span></dd></div>
+        {% if msg.property %}<div><dt>Property</dt><dd><a href="{% url 'dashboard:edit' 'properties' msg.property.pk %}">{{ msg.property.title }}</a></dd></div>{% endif %}
+        {% if msg.agent %}<div><dt>Agent</dt><dd>{{ msg.agent.name }}</dd></div>{% endif %}
+      </dl>
+      <form method="post" class="mt-3">
+        {% csrf_token %}
+        <input type="hidden" name="is_read" value="0">
+        <button type="submit" class="btn btn-dash-light w-100"><i class="bi bi-envelope"></i>Mark as unread</button>
+      </form>
+      {% if can_delete %}<a href="{% url 'dashboard:delete' 'messages' msg.pk %}" class="side-delete"><i class="bi bi-trash3"></i>Delete message</a>{% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

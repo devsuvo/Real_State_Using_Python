@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Saved Properties — {{ site.site_name }}{% endblock %}
+
+{% block content %}
+{% include "partials/page_banner.html" with title=header.title|default:"Saved Properties" %}
+
+<section class="section">
+  <div class="container">
+    {% if properties %}
+      <div class="row g-4">
+        {% for p in properties %}<div class="col-md-6 col-lg-4" data-fav-item="{{ p.pk }}">{% include "partials/property_card.html" %}</div>{% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-heart"></i>
+        <h3>No saved properties yet</h3>
+        <p>Tap the heart on any listing to keep it here for later.</p>
+        <a href="{% url 'properties:list' %}" class="btn btn-accent">Browse properties</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

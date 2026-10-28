@@ -1,0 +1,8 @@
+{% load static %}<a href="{% url 'core:home' %}" class="brand {% if dark %}brand-dark{% endif %}" aria-label="{{ site.site_name }} home">
+  {% if site.logo %}
+    <img src="{{ site.logo.url }}" alt="{{ site.site_name }}" class="brand-img">
+  {% else %}
+    <span class="brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3 4 12v17h8v-9h8v9h8V12z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M4 24c4-3 8 3 12 0s8 3 12 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+    <span class="brand-text">{{ site.site_name }}</span>
+  {% endif %}
+</a>

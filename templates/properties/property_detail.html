@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}{{ property.title }} — {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ property.excerpt|default:property.description|truncatechars:160 }}{% endblock %}
+
+{% block content %}
+<section class="detail-top">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="crumbs is-dark">
+        <li><a href="{% url 'core:home' %}">Home</a></li>
+        <li><a href="{% url 'properties:list' %}">Properties</a></li>
+        {% if property.city %}<li><a href="{{ property.city.get_absolute_url }}">{{ property.city.name }}</a></li>{% endif %}
+        <li aria-current="page">{{ property.title|truncatechars:28 }}</li>
+      </ol>
+    </nav>
+    <div class="detail-head">
+      <div>
+        <div class="property-badges is-static">
+          {% if property.is_featured %}<span class="badge-pill badge-featured">Featured</span>{% endif %}
+          <span class="badge-pill badge-status">{{ property.get_status_display }}</span>
+          {% if property.label %}<span class="badge-pill" style="background:{{ property.label.color }}">{{ property.label.name }}</span>{% endif %}
+        </div>
+        <h1>{{ property.title }}</h1>
+        <p class="detail-address"><i class="bi bi-geo-alt"></i>{{ property.full_address }}</p>
+      </div>
+      <div class="detail-price">
+        <strong>${{ property.price|intcomma }}{% if property.price_suffix %}<small>{{ property.price_suffix }}</small>{% endif %}</strong>
+        {% if property.price_per_sqft %}<span>${{ property.price_per_sqft|intcomma }} / sq ft</span>{% endif %}
+        <div class="detail-actions">
+          <button type="button" class="btn btn-light-outline fav-btn-inline {% if property.pk in favorite_ids %}is-active{% endif %}" data-fav="{{ property.pk }}" data-url="{% url 'core:toggle_favorite' property.pk %}" aria-pressed="{% if property.pk in favorite_ids %}true{% else %}false{% endif %}">
+            <i class="bi bi-heart"></i><i class="bi bi-heart-fill"></i><span>Save</span>
+          </button>
+          <button type="button" class="btn btn-light-outline" data-share><i class="bi bi-share"></i><span>Share</span></button>
+          <button type="button" class="btn btn-light-outline d-none d-md-inline-flex" onclick="window.print()"><i class="bi bi-printer"></i><span>Print</span></button>
+        </div>
+      </div>
+    </div>
+
+    {% with gallery=property.gallery %}
+    <div class="detail-gallery">
+      <div class="swiper gallery-main">
+        <div class="swiper-wrapper">
+          {% for img in gallery %}
+          <div class="swiper-slide"><img src="{{ img }}{% if 'unsplash' in img %}&w=1600&q=80{% endif %}" alt="{{ property.title }} — photo {{ forloop.counter }}" {% if not forloop.first %}loading="lazy"{% endif %}></div>
+          {% endfor %}
+        </div>
+        <button type="button" class="slider-btn gallery-prev" aria-label="Previous photo"><i class="bi bi-arrow-left"></i></button>
+        <button type="button" class="slider-btn gallery-next" aria-label="Next photo"><i class="bi bi-arrow-right"></i></button>
+        <span class="gallery-count"><i class="bi bi-images"></i> {{ gallery|length }} photos</span>
+      </div>
+      {% if gallery|length > 1 %}
+      <div class="swiper gallery-thumbs">
+        <div class="swiper-wrapper">
+          {% for img in gallery %}
+          <div class="swiper-slide"><img src="{{ img }}{% if 'unsplash' in img %}&w=300&q=60{% endif %}" alt="" loading="lazy"></div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endwith %}
+  </div>
+</section>
+
+<section class="section section-tight">
+  <div class="container">
+    <div class="row g-4 g-xl-5">
+      <div class="col-lg-8">
+        <div class="detail-block">
+          <ul class="detail-facts">
+            <li><i class="bi bi-door-closed"></i><span>Bedrooms</span><strong>{{ property.bedrooms }}</strong></li>
+            <li><i class="bi bi-droplet"></i><span>Bathrooms</span><strong>{{ property.baths_display }}</strong></li>
+            <li><i class="bi bi-arrows-angle-expand"></i><span>Living area</span><strong>{{ property.area|intcomma }} ft²</strong></li>
+            <li><i class="bi bi-car-front"></i><span>Garage</span><strong>{{ property.garages }}</strong></li>
+            {% if property.year_built %}<li><i class="bi bi-calendar3"></i><span>Year built</span><strong>{{ property.year_built }}</strong></li>{% endif %}
+            {% if property.property_type %}<li><i class="bi {{ property.property_type.icon }}"></i><span>Type</span><strong>{{ property.property_type.name }}</strong></li>{% endif %}
+          </ul>
+        </div>
+
+        <div class="detail-block">
+          <h2>About this property</h2>
+          <div class="prose">{{ property.description|linebreaks }}</div>
+        </div>
+
+        <div class="detail-block">
+          <h2>Property details</h2>
+          <dl class="detail-table">
+            <div><dt>Property ID</dt><dd>CB-{{ property.pk|stringformat:"04d" }}</dd></div>
+            <div><dt>Price</dt><dd>${{ property.price|intcomma }}{{ property.price_suffix }}</dd></div>
+            <div><dt>Status</dt><dd>{{ property.get_status_display }}</dd></div>
+            <div><dt>Type</dt><dd>{{ property.property_type.name|default:"—" }}</dd></div>
+            <div><dt>Bedrooms</dt><dd>{{ property.bedrooms }}</dd></div>
+            <div><dt>Bathrooms</dt><dd>{{ property.baths_display }}</dd></div>
+            <div><dt>Living area</dt><dd>{{ property.area|intcomma }} sq ft</dd></div>
+            {% if property.lot_size %}<div><dt>Lot size</dt><dd>{{ property.lot_size|intcomma }} sq ft</dd></div>{% endif %}
+            <div><dt>Garage</dt><dd>{{ property.garages }}</dd></div>
+            {% if property.year_built %}<div><dt>Year built</dt><dd>{{ property.year_built }}</dd></div>{% endif %}
+            {% if property.zip_code %}<div><dt>ZIP code</dt><dd>{{ property.zip_code }}</dd></div>{% endif %}
+            <div><dt>City</dt><dd>{{ property.city.name|default:"—" }}</dd></div>
+          </dl>
+        </div>
+
+        {% if property.amenities.all %}
+        <div class="detail-block">
+          <h2>Features &amp; amenities</h2>
+          <ul class="amenity-list">
+            {% for a in property.amenities.all %}<li><i class="bi {{ a.icon }}"></i>{{ a.name }}</li>{% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if property.video_url %}
+        <div class="detail-block">
+          <h2>Video tour</h2>
+          <div class="ratio ratio-16x9 rounded-4 overflow-hidden">
+            <iframe src="{{ property.video_url }}" title="Video tour of {{ property.title }}" allowfullscreen loading="lazy"></iframe>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="detail-block">
+          <h2>Location</h2>
+          <p class="text-muted mb-3"><i class="bi bi-geo-alt me-1"></i>{{ property.full_address }}</p>
+          <div class="map-frame">
+            <iframe src="{{ property.map_embed_url }}" title="Map of {{ property.full_address }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <aside class="col-lg-4">
+        <div class="sticky-side">
+          <div class="sidebar-widget inquiry-widget" id="inquiry">
+            {% if property.agent %}
+            <div class="agent-row">
+              <img src="{{ property.agent.img }}{% if 'unsplash' in property.agent.img %}&w=160&h=160&fit=crop&crop=faces&q=70{% endif %}" alt="{{ property.agent.name }}">
+              <div>
+                <strong><a href="{{ property.agent.get_absolute_url }}">{{ property.agent.name }}</a></strong>
+                <span>{{ property.agent.title }}</span>
+                {% if property.agent.phone %}<a href="tel:{{ property.agent.phone }}" class="agent-phone"><i class="bi bi-telephone"></i>{{ property.agent.phone }}</a>{% endif %}
+              </div>
+            </div>
+            {% else %}
+            <h4>Ask about this property</h4>
+            {% endif %}
+            {% include "partials/contact_form.html" with stacked=True submit_label="Request Information" %}
+          </div>
+          <div class="sidebar-widget widget-mini-cta">
+            <i class="bi bi-calendar2-check"></i>
+            <div>
+              <strong>Schedule a private tour</strong>
+              <span>In person or by video call — at a time that suits you.</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+{% if similar %}
+<section class="section section-alt">
+  <div class="container">
+    {% include "partials/section_heading.html" with eyebrow="You may also like" title="Similar Properties" %}
+    <div class="row g-4">
+      {% for p in similar %}<div class="col-md-6 col-lg-4">{% include "partials/property_card.html" %}</div>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,19 @@
+<article class="agent-card">
+  <a href="{{ a.get_absolute_url }}" class="agent-card-img">
+    <img src="{{ a.img }}{% if 'unsplash' in a.img %}&w=600&h=700&fit=crop&crop=faces&q=75{% endif %}" alt="{{ a.name }}" loading="lazy">
+    <div class="agent-card-social">
+      {% if a.facebook %}<span data-href="{{ a.facebook }}"><i class="bi bi-facebook"></i></span>{% endif %}
+      {% if a.instagram %}<span data-href="{{ a.instagram }}"><i class="bi bi-instagram"></i></span>{% endif %}
+      {% if a.linkedin %}<span data-href="{{ a.linkedin }}"><i class="bi bi-linkedin"></i></span>{% endif %}
+    </div>
+  </a>
+  <div class="agent-card-body">
+    <h3><a href="{{ a.get_absolute_url }}">{{ a.name }}</a></h3>
+    <p>{{ a.title }}</p>
+    <div class="agent-card-contact">
+      {% if a.phone %}<a href="tel:{{ a.phone }}" aria-label="Call {{ a.name }}"><i class="bi bi-telephone"></i></a>{% endif %}
+      {% if a.email %}<a href="mailto:{{ a.email }}" aria-label="Email {{ a.name }}"><i class="bi bi-envelope"></i></a>{% endif %}
+      <a href="{{ a.get_absolute_url }}" class="agent-card-link">View profile <i class="bi bi-arrow-right"></i></a>
+    </div>
+  </div>
+</article>

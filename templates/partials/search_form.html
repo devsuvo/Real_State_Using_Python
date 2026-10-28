@@ -1,0 +1,88 @@
+{% with g=request.GET %}
+<form method="get" action="{% url 'properties:list' %}" class="search-box {% if compact %}is-compact{% endif %}">
+  {% if not compact %}
+  <div class="search-tabs" role="tablist">
+    <label class="search-tab"><input type="radio" name="status" value="" {% if not g.status %}checked{% endif %}><span>All</span></label>
+    <label class="search-tab"><input type="radio" name="status" value="sale" {% if g.status == 'sale' %}checked{% endif %}><span>For Sale</span></label>
+    <label class="search-tab"><input type="radio" name="status" value="rent" {% if g.status == 'rent' %}checked{% endif %}><span>For Rent</span></label>
+  </div>
+  {% endif %}
+  <div class="search-fields">
+    <div class="search-field search-field-wide">
+      <label for="sf-q">Location or keyword</label>
+      <div class="input-icon"><i class="bi bi-search"></i>
+        <input type="text" id="sf-q" name="q" value="{{ g.q }}" placeholder="Address, neighborhood, ZIP…">
+      </div>
+    </div>
+    <div class="search-field">
+      <label for="sf-city">City</label>
+      <select id="sf-city" name="city" class="form-select">
+        <option value="">All Cities</option>
+        {% for c in nav_cities %}<option value="{{ c.slug }}" {% if g.city == c.slug %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="search-field">
+      <label for="sf-type">Property type</label>
+      <select id="sf-type" name="type" class="form-select">
+        <option value="">All Types</option>
+        {% for t in nav_types %}<option value="{{ t.slug }}" {% if g.type == t.slug %}selected{% endif %}>{{ t.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="search-field">
+      <label for="sf-max">Max price</label>
+      <select id="sf-max" name="max_price" class="form-select">
+        <option value="">Any Price</option>
+        {% for v, l in price_options %}<option value="{{ v }}" {% if g.max_price == v|stringformat:'s' %}selected{% endif %}>{{ l }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="search-actions">
+      <button type="button" class="btn btn-ghost" data-bs-toggle="collapse" data-bs-target="#advSearch{{ compact|yesno:'C,H' }}" aria-expanded="false" aria-label="More search options">
+        <i class="bi bi-sliders"></i><span class="d-xl-none ms-2">More</span>
+      </button>
+      <button type="submit" class="btn btn-accent btn-search"><i class="bi bi-search"></i><span>Search</span></button>
+    </div>
+  </div>
+  <div class="collapse" id="advSearch{{ compact|yesno:'C,H' }}">
+    <div class="search-advanced">
+      {% if compact %}
+      <div class="search-field">
+        <label for="sf-status{{ compact|yesno:'C,H' }}">Status</label>
+        <select id="sf-status{{ compact|yesno:'C,H' }}" name="status" class="form-select">
+          <option value="">Any</option>
+          <option value="sale" {% if g.status == 'sale' %}selected{% endif %}>For Sale</option>
+          <option value="rent" {% if g.status == 'rent' %}selected{% endif %}>For Rent</option>
+        </select>
+      </div>
+      {% endif %}
+      <div class="search-field">
+        <label>Bedrooms</label>
+        <select name="beds" class="form-select" aria-label="Minimum bedrooms">
+          <option value="">Any</option>
+          {% for n in number_options %}<option value="{{ n }}" {% if g.beds == n|stringformat:'s' %}selected{% endif %}>{{ n }}+</option>{% endfor %}
+        </select>
+      </div>
+      <div class="search-field">
+        <label>Bathrooms</label>
+        <select name="baths" class="form-select" aria-label="Minimum bathrooms">
+          <option value="">Any</option>
+          {% for n in number_options %}<option value="{{ n }}" {% if g.baths == n|stringformat:'s' %}selected{% endif %}>{{ n }}+</option>{% endfor %}
+        </select>
+      </div>
+      <div class="search-field">
+        <label>Min price</label>
+        <select name="min_price" class="form-select" aria-label="Minimum price">
+          <option value="">No Min</option>
+          {% for v, l in price_options %}<option value="{{ v }}" {% if g.min_price == v|stringformat:'s' %}selected{% endif %}>{{ l }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="search-field">
+        <label>Label</label>
+        <select name="label" class="form-select" aria-label="Label">
+          <option value="">Any</option>
+          {% for l in nav_labels %}<option value="{{ l.slug }}" {% if g.label == l.slug %}selected{% endif %}>{{ l.name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+</form>
+{% endwith %}

@@ -1,0 +1,170 @@
+{% extends "dashboard/base.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="dash-head">
+  <div>
+    <h1>Good to see you, {{ request.user.first_name|default:request.user.get_username|capfirst }}</h1>
+    <p>Here's what's happening on {{ site.site_name }} today.</p>
+  </div>
+  <div class="dash-head-actions">
+    <a href="{% url 'dashboard:add' 'posts' %}" class="btn btn-dash-light"><i class="bi bi-pencil-square"></i>New post</a>
+    <a href="{% url 'dashboard:add' 'properties' %}" class="btn btn-dash"><i class="bi bi-plus-lg"></i>Add property</a>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  {% for k in kpis %}
+  <a href="{{ k.url }}" class="kpi">
+    <span class="kpi-icon"><i class="bi {{ k.icon }}"></i></span>
+    <span class="kpi-label">{{ k.label }}</span>
+    <strong class="kpi-value">{{ k.value|intcomma }}</strong>
+    <span class="kpi-sub">{{ k.sub }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+<div class="row g-4 mt-0">
+  <div class="col-xl-8">
+    <section class="card-d h-100">
+      <header class="card-d-head">
+        <div>
+          <h2>Leads — last 30 days</h2>
+          <p>{{ leads_total }} enquir{{ leads_total|pluralize:"y,ies" }} from contact forms, property pages, agents and the popup</p>
+        </div>
+        <a href="{% url 'dashboard:list' 'messages' %}" class="card-d-link">Open inbox <i class="bi bi-arrow-right"></i></a>
+      </header>
+      <div class="chart-box">
+        <canvas id="leadsChart" role="img" aria-label="Line chart of leads received per day over the last 30 days, {{ leads_total }} in total"></canvas>
+      </div>
+    </section>
+  </div>
+  <div class="col-xl-4">
+    <section class="card-d h-100">
+      <header class="card-d-head"><div><h2>Portfolio</h2><p>Published listings</p></div></header>
+      <div class="portfolio-hero">
+        <span>Total value for sale</span>
+        <strong>${{ sale_value|intcomma }}</strong>
+      </div>
+      <div class="split-stat">
+        <div><strong>{{ sale_count }}</strong><span>For sale</span></div>
+        <div><strong>{{ rent_count }}</strong><span>For rent</span></div>
+      </div>
+      <h3 class="mini-title">By property type</h3>
+      <ul class="bar-list">
+        {% for name, n, pct in by_type %}
+        <li>
+          <div class="bar-list-row"><span>{{ name }}</span><strong>{{ n }}</strong></div>
+          <div class="bar-track"><div class="bar-fill" style="width:{{ pct }}%"></div></div>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+
+<div class="row g-4 mt-0">
+  <div class="col-xl-7">
+    <section class="card-d h-100">
+      <header class="card-d-head">
+        <div><h2>Recent leads</h2><p>Newest messages first — unread ones are highlighted</p></div>
+        <a href="{% url 'dashboard:export' 'messages' %}" class="card-d-link"><i class="bi bi-download"></i> CSV</a>
+      </header>
+      {% if recent_leads %}
+      <ul class="lead-list">
+        {% for m in recent_leads %}
+        <li class="{% if not m.is_read %}is-unread{% endif %}">
+          <a href="{% url 'dashboard:edit' 'messages' m.pk %}">
+            <span class="dash-avatar is-soft">{{ m.name|slice:":1"|upper }}</span>
+            <span class="lead-main">
+              <strong>{{ m.name }}</strong>
+              <small>{% if m.property %}{{ m.property.title|truncatechars:42 }}{% else %}{{ m.subject|default:m.message|truncatechars:48 }}{% endif %}</small>
+            </span>
+            <span class="lead-meta">
+              <span class="pill">{{ m.get_source_display }}</span>
+              <small>{{ m.created|naturaltime }}</small>
+            </span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+        <div class="empty-d"><i class="bi bi-inbox"></i><p>No leads yet. They'll appear here as soon as visitors get in touch.</p></div>
+      {% endif %}
+    </section>
+  </div>
+  <div class="col-xl-5">
+    <section class="card-d mb-4">
+      <header class="card-d-head"><div><h2>Quick actions</h2></div></header>
+      <div class="quick-grid">
+        <a href="{% url 'dashboard:singleton' 'site-settings' %}"><i class="bi bi-sliders"></i>Site settings</a>
+        <a href="{% url 'dashboard:list' 'hero-slides' %}"><i class="bi bi-images"></i>Hero slides</a>
+        <a href="{% url 'dashboard:list' 'popups' %}"><i class="bi bi-window-stack"></i>Popup</a>
+        <a href="{% url 'dashboard:singleton' 'about' %}"><i class="bi bi-info-circle"></i>About page</a>
+        <a href="{% url 'dashboard:list' 'agents' %}"><i class="bi bi-person-badge"></i>Agents</a>
+        <a href="{% url 'dashboard:list' 'testimonials' %}"><i class="bi bi-chat-quote"></i>Testimonials</a>
+      </div>
+      {% if active_popup %}
+      <div class="popup-status">
+        <span class="status-dot is-on"></span>
+        <span>Popup live: <strong>{{ active_popup.title|truncatechars:40 }}</strong></span>
+        <a href="{% url 'dashboard:edit' 'popups' active_popup.pk %}">Edit</a>
+      </div>
+      {% else %}
+      <div class="popup-status"><span class="status-dot"></span><span>No popup is active</span><a href="{% url 'dashboard:list' 'popups' %}">Manage</a></div>
+      {% endif %}
+    </section>
+    <section class="card-d">
+      <header class="card-d-head">
+        <div><h2>Latest listings</h2></div>
+        <a href="{% url 'dashboard:list' 'properties' %}" class="card-d-link">All <i class="bi bi-arrow-right"></i></a>
+      </header>
+      <ul class="mini-props">
+        {% for p in recent_props %}
+        <li>
+          <a href="{% url 'dashboard:edit' 'properties' p.pk %}">
+            <img src="{{ p.img }}{% if 'unsplash' in p.img %}&w=160&h=120&fit=crop&q=60{% endif %}" alt="">
+            <span><strong>{{ p.title|truncatechars:34 }}</strong><small>{{ p.city.name|default:"—" }} · ${{ p.price|intcomma }}{{ p.price_suffix }}</small></span>
+            {% if not p.is_published %}<em class="pill pill-muted">Hidden</em>{% endif %}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  var data = {{ chart|safe }};
+  var el = document.getElementById("leadsChart");
+  if (!el || !window.Chart) return;
+  var css = getComputedStyle(document.documentElement);
+  var accent = css.getPropertyValue("--d-accent").trim() || "#12A4B0";
+  var ctx = el.getContext("2d");
+  var grad = ctx.createLinearGradient(0, 0, 0, 280);
+  grad.addColorStop(0, accent + "33");
+  grad.addColorStop(1, accent + "00");
+  new Chart(el, {
+    type: "line",
+    data: { labels: data.labels, datasets: [{ label: "Leads", data: data.leads, borderColor: accent, backgroundColor: grad, fill: true, borderWidth: 2, tension: 0.35, pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: accent, pointHoverBorderColor: "#fff", pointHoverBorderWidth: 2 }] },
+    options: {
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: "#0f1d2e", padding: 10, cornerRadius: 8, displayColors: false, titleFont: { weight: "600" },
+                   callbacks: { label: function (c) { return c.parsed.y + (c.parsed.y === 1 ? " lead" : " leads"); } } }
+      },
+      scales: {
+        x: { grid: { display: false }, border: { display: false }, ticks: { color: "#8a94a6", maxTicksLimit: 8, font: { size: 11 } } },
+        y: { beginAtZero: true, border: { display: false }, grid: { color: "#eef1f5" }, ticks: { color: "#8a94a6", precision: 0, maxTicksLimit: 5, font: { size: 11 } } }
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

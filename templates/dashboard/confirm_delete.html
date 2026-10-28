@@ -1,0 +1,16 @@
+{% extends "dashboard/base.html" %}
+
+{% block content %}
+<div class="confirm-wrap">
+  <section class="card-d confirm-card">
+    <span class="confirm-icon"><i class="bi bi-trash3"></i></span>
+    <h1>Delete this {{ resource.singular|lower }}?</h1>
+    <p><strong>“{{ obj }}”</strong> will be permanently removed from the website. This can't be undone.</p>
+    <form method="post" class="confirm-actions">
+      {% csrf_token %}
+      <a href="{% if resource.key == 'messages' or not resource.can_edit %}{% url 'dashboard:list' resource.key %}{% else %}{% url 'dashboard:edit' resource.key obj.pk %}{% endif %}" class="btn btn-dash-light">Cancel</a>
+      <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i>Yes, delete</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

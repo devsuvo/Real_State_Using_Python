@@ -1,0 +1,15 @@
+<article class="post-card">
+  <a href="{{ post.get_absolute_url }}" class="post-card-img">
+    <img src="{{ post.img }}{% if 'unsplash' in post.img %}&w=800&q=75{% endif %}" alt="{{ post.title }}" loading="lazy">
+    {% if post.category %}<span class="post-cat">{{ post.category.name }}</span>{% endif %}
+  </a>
+  <div class="post-card-body">
+    <div class="post-meta">
+      <span><i class="bi bi-calendar3"></i>{{ post.published_at|date:"M j, Y" }}</span>
+      <span><i class="bi bi-clock"></i>{{ post.read_minutes }} min read</span>
+    </div>
+    <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+    <p>{{ post.excerpt|truncatechars:130 }}</p>
+    <a href="{{ post.get_absolute_url }}" class="link-arrow">Read article <i class="bi bi-arrow-right"></i></a>
+  </div>
+</article>

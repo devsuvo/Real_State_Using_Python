@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}About Us — {{ site.site_name }}{% endblock %}
+
+{% block content %}
+{% include "partials/page_banner.html" with title=header.title|default:"About Us" %}
+
+<section class="section">
+  <div class="container">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-6">
+        <div class="about-media">
+          {% if about.intro_img %}<img src="{{ about.intro_img }}{% if 'unsplash' in about.intro_img %}&w=900&q=75{% endif %}" alt="" class="about-img-main">{% endif %}
+          {% if about.second_img %}<img src="{{ about.second_img }}{% if 'unsplash' in about.second_img %}&w=600&q=75{% endif %}" alt="" class="about-img-second" loading="lazy">{% endif %}
+          <div class="about-years"><strong>{{ about.years_experience }}+</strong><span>Years of<br>experience</span></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        {% include "partials/section_heading.html" with eyebrow=about.intro_eyebrow title=about.intro_title align="left" %}
+        <div class="prose">{{ about.intro_text|linebreaks }}</div>
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <a href="{% url 'properties:list' %}" class="btn btn-accent btn-lg">Browse properties</a>
+          <a href="{% url 'core:contact' %}" class="btn btn-outline-primary btn-lg">Contact us</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if stats %}
+<section class="stats-strip is-static">
+  <div class="container">
+    <div class="stats-grid">
+      {% for s in stats %}
+      <div class="stat">
+        <span class="stat-value">{{ s.prefix }}<span data-count="{{ s.value }}">0</span>{{ s.suffix }}</span>
+        <span class="stat-label">{{ s.label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="value-card"><span class="value-num">01</span><h3>{{ about.mission_title }}</h3><p>{{ about.mission_text }}</p></div>
+      </div>
+      <div class="col-md-4">
+        <div class="value-card"><span class="value-num">02</span><h3>{{ about.vision_title }}</h3><p>{{ about.vision_text }}</p></div>
+      </div>
+      <div class="col-md-4">
+        <div class="value-card"><span class="value-num">03</span><h3>{{ about.values_title }}</h3><p>{{ about.values_text }}</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if features %}
+<section class="section section-alt">
+  <div class="container">
+    {% include "partials/section_heading.html" with eyebrow="What we do" title=site.features_title subtitle=site.features_subtitle %}
+    <div class="row g-4">
+      {% for f in features %}
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi {{ f.icon }}"></i></div>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.description }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if about.show_team and agents %}
+<section class="section">
+  <div class="container">
+    {% include "partials/section_heading.html" with eyebrow="Our Team" title=site.agents_title subtitle=site.agents_subtitle %}
+    <div class="row g-4">
+      {% for a in agents %}<div class="col-6 col-lg-3">{% include "partials/agent_card.html" %}</div>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if about.show_testimonials and testimonials %}
+  {% include "partials/testimonials.html" %}
+{% endif %}
+{% endblock %}

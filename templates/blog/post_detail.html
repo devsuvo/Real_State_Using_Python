@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} — {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ post.excerpt }}{% endblock %}
+
+{% block content %}
+{% url 'blog:list' as blog_url %}
+{% include "partials/page_banner.html" with title=post.title crumb=post.title|truncatechars:30 crumb_parent="Blog" crumb_parent_url=blog_url bg=post.img %}
+
+<section class="section section-tight">
+  <div class="container">
+    <div class="row g-4 g-xl-5">
+      <article class="col-lg-8">
+        <div class="post-meta post-meta-lg">
+          {% if post.author %}
+          <a href="{{ post.author.get_absolute_url }}" class="agent-mini"><img src="{{ post.author.img }}{% if 'unsplash' in post.author.img %}&w=80&h=80&fit=crop&crop=faces{% endif %}" alt=""><span>{{ post.author.name }}</span></a>
+          {% endif %}
+          <span><i class="bi bi-calendar3"></i>{{ post.published_at|date:"F j, Y" }}</span>
+          <span><i class="bi bi-clock"></i>{{ post.read_minutes }} min read</span>
+          {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="post-cat is-static">{{ post.category.name }}</a>{% endif %}
+        </div>
+        <img src="{{ post.img }}{% if 'unsplash' in post.img %}&w=1400&q=80{% endif %}" alt="{{ post.title }}" class="post-cover">
+        <div class="prose prose-lg">
+          <p class="lead">{{ post.excerpt }}</p>
+          {% for kind, text in post.blocks %}
+            {% if kind == "h" %}<h2>{{ text }}</h2>{% else %}<p>{{ text|linebreaksbr }}</p>{% endif %}
+          {% endfor %}
+        </div>
+        <div class="post-share">
+          <span>Share this article</span>
+          <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener" aria-label="Share on Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ post.title|urlencode }}" target="_blank" rel="noopener" aria-label="Share on X"><i class="bi bi-twitter-x"></i></a>
+          <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener" aria-label="Share on LinkedIn"><i class="bi bi-linkedin"></i></a>
+          <button type="button" data-share aria-label="Copy link"><i class="bi bi-link-45deg"></i></button>
+        </div>
+
+        {% if related %}
+        <div class="mt-5">
+          <h3 class="h4 mb-4">Keep reading</h3>
+          <div class="row g-4">
+            {% for post in related %}<div class="col-md-6">{% include "partials/post_card.html" %}</div>{% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </article>
+      <aside class="col-lg-4">{% include "blog/sidebar.html" %}</aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

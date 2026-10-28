@@ -1,0 +1,62 @@
+/* Crystal Bay admin theme — overrides Django admin CSS variables */
+:root, html[data-theme="light"] {
+  --primary: #12A4B0;
+  --secondary: #0E2A47;
+  --accent: #7FE0E8;
+  --primary-fg: #fff;
+  --header-color: #cfe3ee;
+  --header-branding-color: #fff;
+  --header-bg: #0E2A47;
+  --header-link-color: #fff;
+  --breadcrumbs-bg: #133559;
+  --breadcrumbs-link-fg: #9fe3ea;
+  --breadcrumbs-fg: #cfe3ee;
+  --link-fg: #0f8c97;
+  --link-hover-color: #0E2A47;
+  --link-selected-fg: #0E2A47;
+  --button-bg: #12A4B0;
+  --button-hover-bg: #0E2A47;
+  --default-button-bg: #0E2A47;
+  --default-button-hover-bg: #12A4B0;
+  --selected-row: #e8f7f8;
+  --font-family-primary: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #12A4B0;
+    --secondary: #0E2A47;
+    --header-bg: #0b1f35;
+    --breadcrumbs-bg: #102a46;
+    --link-fg: #6fd3dc;
+    --button-bg: #12A4B0;
+    --default-button-bg: #12A4B0;
+  }
+}
+html[data-theme="dark"] {
+  --header-bg: #0b1f35;
+  --breadcrumbs-bg: #102a46;
+  --link-fg: #6fd3dc;
+  --button-bg: #12A4B0;
+  --default-button-bg: #12A4B0;
+}
+
+#header { padding: 14px 32px; box-shadow: 0 2px 12px rgba(0,0,0,.12); }
+.cb-admin-brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.15rem; color: #fff !important; }
+.cb-admin-mark { width: 34px; height: 34px; border-radius: 9px; background: #12A4B0; display: inline-grid; place-items: center; color: #fff; }
+.cb-admin-mark svg { width: 20px; height: 20px; }
+.cb-admin-sub { font-weight: 500; opacity: .6; }
+div.breadcrumbs { padding: 10px 32px; }
+#content { padding: 24px 32px; }
+
+.module { border-radius: 10px; overflow: hidden; }
+.module h2, .module caption, .inline-group h2 { background: var(--secondary); font-weight: 600; letter-spacing: .02em; }
+fieldset.module h2, fieldset.module summary h2 { background: #eef6f8; color: #0E2A47; }
+html[data-theme="dark"] fieldset.module h2, html[data-theme="dark"] fieldset.module summary h2 { background: #16314f; color: #d8eef2; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) fieldset.module h2, :root:not([data-theme="light"]) fieldset.module summary h2 { background: #16314f; color: #d8eef2; }
+}
+.button, input[type=submit], input[type=button], .submit-row input, a.button { border-radius: 8px !important; }
+.submit-row { border-radius: 10px; }
+#changelist-filter { border-radius: 10px; }
+.dashboard .module table th { width: 100%; }
+.help, .help p, div.help { font-size: .8rem; }
